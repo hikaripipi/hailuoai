@@ -11,28 +11,38 @@ api_key = os.getenv("API_KEY")
 
 
 def main():
-    # # 画像から動画生成を開始し、タスクIDを取得
-    # image_path = "/Users/hikarimac/Documents/python/hailuo/comic, manga, eating, food, cake s-2934502518_declutter.png"
-    # task_id = generate_video_from_image(image_path)
+    # 画像とプロンプトを設定
+    image_path = "/Users/hikarimac/Documents/python/hailuo/2girls, {{{comic}}}, manga,  s-2538467477.png"
+    prompt = ""
 
-    # if not task_id:
-    #     print("タスクIDの取得に失敗しました。")
-    #     return
-    task_id = "122331555329900544"
-    print(f"取得したタスクID: {task_id}")
+    # 生成したい動画の数を指定
+    # 生成したい動画の数を指定
+    num_videos = 3
+    task_ids = []
 
-    # ステータスを確認し、成功したらダウンロード
-    while True:
-        status, file_id = query_video_generation_status(api_key, task_id)
-        print(f"現在のタスクID: {task_id}, ステータス: {status}")
-        if status == "Success":
-            download_video(file_id)
-            break
-        elif status == "Fail":
-            print("タスクが失敗しました。")
-            break
+    # すべての動画生成リクエストを送信
+    for i in range(num_videos):
+        print(f"動画 {i+1} の生成リクエストを送信中...")
+        task_id = generate_video_from_image(image_path, prompt)
+        if task_id:
+            task_ids.append(task_id)
         else:
-            print("タスクがまだ処理中です。1分後に再確認します。")
+            print(f"動画 {i+1} のタスクIDの取得に失敗しました。")
+
+    # すべてのタスクのステータスを確認
+    while task_ids:
+        for task_id in task_ids[:]:  # コピーを使ってループ中にリストを変更
+            status, file_id = query_video_generation_status(api_key, task_id)
+            print(f"タスクID: {task_id}, ステータス: {status}")
+            if status == "Success":
+                download_video(file_id)
+                task_ids.remove(task_id)  # 成功したタスクをリストから削除
+            elif status == "Fail":
+                print(f"タスクID {task_id} が失敗しました。")
+                task_ids.remove(task_id)  # 失敗したタスクをリストから削除
+
+        if task_ids:
+            print("まだ処理中のタスクがあります。1分後に再確認します。")
             time.sleep(60)  # 1分待機
 
 

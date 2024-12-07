@@ -25,12 +25,13 @@ def download_video(file_id):
         if download_url:
             video_response = requests.get(download_url)
             if video_response.status_code == 200:
-                with open(
-                    "/Users/hikarimac/Documents/python/hailuo/output/output_video.mp4",
-                    "wb",
-                ) as video_file:
+                # ファイルIDを使って動画の名前を付ける
+                video_path = f"/Users/hikarimac/Documents/python/hailuo/output/{file_id}_video.mp4"
+                with open(video_path, "wb") as video_file:
                     video_file.write(video_response.content)
-                print("ビデオが正常にダウンロードされました！")
+                print(
+                    f"ビデオが正常にダウンロードされました！ファイル名: {file_id}_video.mp4"
+                )
             else:
                 print(
                     "ビデオのダウンロードに失敗しました。ステータスコード:",
